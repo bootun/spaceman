@@ -1,0 +1,5 @@
+agents:
+  spaceman:
+    model_id: "" # 模型ID
+    base_url: "" # 带v1后缀的OpenAI URL
+    token: "" # API key
