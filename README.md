@@ -9,3 +9,7 @@ COSMICA - Agent合集
 
 ## usage
 将`example.config.yml`更名为`config.yml`, 并填上对应的配置即可。
+
+## TODO
+[] 修改浏览器生命周期
+[] 任务拆解以避免上下文长度溢出

@@ -59,3 +59,11 @@ func (ts *ToolSet) AddTool(tool tool.InvokableTool) error {
 	ts.infos = append(ts.infos, info)
 	return nil
 }
+
+func (ts *ToolSet) ToolList() []tool.InvokableTool {
+	tools := make([]tool.InvokableTool, 0, len(ts.toolsMap))
+	for _, t := range ts.toolsMap {
+		tools = append(tools, t)
+	}
+	return tools
+}

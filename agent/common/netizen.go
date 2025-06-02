@@ -9,21 +9,19 @@ import (
 	"github.com/bootun/cosmica/config"
 	"github.com/bootun/cosmica/tools"
 	"github.com/bootun/cosmica/tools/base"
-	"github.com/bootun/cosmica/tools/compose"
-	"github.com/bootun/cosmica/tools/file"
-	"github.com/bootun/cosmica/tools/shell"
 	"github.com/bootun/cosmica/utils"
 	"github.com/bootun/cosmica/utils/text"
 	"github.com/cloudwego/eino-ext/components/model/openai"
+	"github.com/cloudwego/eino-ext/components/tool/browseruse"
 	"github.com/cloudwego/eino/schema"
 )
 
-type SpaceMan struct {
+type Netizen struct {
 	model   *openai.ChatModel
 	toolSet *tools.ToolSet
 }
 
-func NewSpaceMan(ctx context.Context) (agent.Agent, error) {
+func NewNetizen(ctx context.Context, task string) (agent.Agent, error) {
 	cfg, err := config.LoadConfig("config.yml")
 	if err != nil {
 		return nil, fmt.Errorf("load config: %w", err)
@@ -37,16 +35,16 @@ func NewSpaceMan(ctx context.Context) (agent.Agent, error) {
 	if err != nil {
 		return nil, fmt.Errorf("create chat model: %w", err)
 	}
-
+	bt, err := browseruse.NewBrowserUseTool(ctx, &browseruse.Config{
+		Headless: false,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("create browser use tool: %w", err)
+	}
 	// 为AI配置工具集
 	ts, err := tools.NewToolSet(
-		shell.NewShellExecutor(),
 		base.NewBell(),
-		file.NewFileReader(),
-		file.NewDirReader(),
-		compose.NewAgentCreator(
-			NewNetizen,
-		),
+		bt,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("create tool set: %w", err)
@@ -54,14 +52,14 @@ func NewSpaceMan(ctx context.Context) (agent.Agent, error) {
 	if err = chatModel.BindTools(ts.Infos()); err != nil {
 		return nil, fmt.Errorf("bind tools: %w", err)
 	}
-	return &SpaceMan{model: chatModel, toolSet: ts}, nil
+	return &Netizen{model: chatModel, toolSet: ts}, nil
 }
 
 // TODO(bootun): refactor me
-func (sm *SpaceMan) HandleQuestion(ctx context.Context, question string, history []*schema.Message) (chatHistory []*schema.Message, err error) {
+func (sm *Netizen) HandleQuestion(ctx context.Context, question string, history []*schema.Message) (chatHistory []*schema.Message, err error) {
 	if len(history) < 1 {
 		chatHistory = []*schema.Message{
-			schema.SystemMessage("你是spaceman, 一个严格遵守用户指令，不会偷懒的人工智能，负责规划并解决用户提出的问题。在进行所有行动之前，你需要预先规划为了完成这件事，接下来要做的事情，并告诉用户，然后才行动、调用工具等。"),
+			schema.SystemMessage("你是netizen, 一个严格遵守用户指令，不会偷懒的人工智能。你擅长使用浏览器从网络上获取知识、进行操作"),
 		}
 	} else {
 		chatHistory = history

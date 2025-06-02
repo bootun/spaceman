@@ -36,3 +36,8 @@ func (s *bell) InvokableRun(ctx context.Context, argumentsInJSON string, opts ..
 	log.Printf("任务已完成")
 	return FinishFlag, nil
 }
+
+// TODO(bootun): 终止原因
+type bellParams struct {
+	Reason string `json:"reason"`
+}
